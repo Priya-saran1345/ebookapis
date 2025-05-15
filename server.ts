@@ -1,1 +1,8 @@
-console.log("this is the server file ")
+import  app from './src/app'
+const startServer=()=>{
+    const port=process.env.PORT||3000
+    app.listen(port,()=>{
+        console.log('the server is listening at ',port)
+    })
+}
+startServer()
