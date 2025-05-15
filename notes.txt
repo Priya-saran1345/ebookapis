@@ -1,0 +1,6 @@
+npm i
+npm  i -D typescript ts-node nodemon @types/node
+npx tsc --init
+  "scripts": {
+"dev":"nodemon server.ts"
+  }
