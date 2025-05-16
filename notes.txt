@@ -4,3 +4,13 @@ npx tsc --init
   "scripts": {
 "dev":"nodemon server.ts"
   }
+env setup-----------------------------------
+ npm i dotenv
+  npm i -D @types/dotenv 
+
+  import {config as conf } from 'dotenv';
+conf()
+const _config={
+    port :process.env.PORT,
+}
+export const config=Object.freeze( _config);
