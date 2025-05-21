@@ -13,5 +13,7 @@
     app.use(express.json());
     app.use("/api/users",userRouter)
     app.use("/api/book",bookRouter)
+    app.use(express.urlencoded({ extended: true }));
+
     app.use(globalErroHandler);
     export default app;

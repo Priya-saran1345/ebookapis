@@ -15,3 +15,10 @@ const _config={
 }
 export const config=Object.freeze( _config);
 set up mongo db ----------------------------
+
+
+multer install 
+multer configuration
+uploader middleware 
+cloudinary configuration
+and get the files at cloudinary
