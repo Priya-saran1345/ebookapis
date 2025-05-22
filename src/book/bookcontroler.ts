@@ -48,13 +48,15 @@ export const deletebook = async (req: Request, res: Response, next: NextFunction
     const imagePublicId = getCloudinaryPublicId(book.coverImage, "book-covers");
     // Delete PDF
     try {
-      await cloudinary.uploader.destroy(filePublicId, { resource_type: "raw" });
+      console.log('the public id of the file is',filePublicId)
+      await cloudinary.uploader.destroy(`${filePublicId}.pdf`, { resource_type: "raw" });
     } catch (error) {
       console.log("Error deleting PDF from Cloudinary:", error);
       return next(createHttpError(404, "Could not delete PDF from Cloudinary"));
     }
     // Delete Cover Image
     try {
+      console.log('the public id of the image is',imagePublicId)
       await cloudinary.uploader.destroy(imagePublicId);
     } catch (error) {
       console.log("Error deleting image from Cloudinary:", error);
@@ -73,13 +75,6 @@ export const deletebook = async (req: Request, res: Response, next: NextFunction
 
 
 
-
-
-
-
-
-
-
 export const addbook = async (
   req: Request,
   res: Response,
@@ -87,7 +82,6 @@ export const addbook = async (
 ) => {
   console.log("file i received", req.body);
   console.log("Files received:", req.files);
-
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     console.log("the files are ", files);
@@ -142,9 +136,7 @@ export const addbook = async (
     return next(error1);
   }
 };
-
-
-export const updatebook = async (
+export const updatebook = async(
   req: Request,
   res: Response,
   next: NextFunction
@@ -153,8 +145,19 @@ export const updatebook = async (
   const _req = req as Authrequest;
   try {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-    
-    let updatedFields: any = {
+  const book = await bookSchema.findById(bookid);
+  if (!book) {
+    const error = createHttpError(404, "book not found");
+    return next(error);
+  }
+  // if(book.author !==String(_req.author))
+  // {
+  //   console.log('the book author id is ',book.author)
+  //   console.log('the requested author is ',_req.author)
+  //   const error = createHttpError(403, "you are not the author of this book");
+  //   return next(error);
+  // }
+    let updatedFields : any = { 
       title: req.body.title,
       genre:req.body.genre,
       author: _req.author,
@@ -168,7 +171,6 @@ export const updatebook = async (
         coverImage_name
       );
       const coverImage_type = files.coverImage[0].mimetype.split("/").at(-1);
-
       const uploadResult = await cloudinary.uploader.upload(coverImage_filepath, {
         filename_override: coverImage_name,
         folder: "book-covers",
@@ -177,7 +179,6 @@ export const updatebook = async (
       updatedFields.coverImage = uploadResult.secure_url;
       await fs.promises.unlink(coverImage_filepath);
     }
-
     // Upload book PDF if provided
     if (files?.file?.[0]) {
       const book_pdf_name = files.file[0].filename;
@@ -187,14 +188,12 @@ export const updatebook = async (
         book_pdf_name
       );
       const book_pdf_type = files.file[0].mimetype.split("/").at(-1);
-
       const uploadResultPdf = await cloudinary.uploader.upload(book_pdf_filepath, {
         resource_type: "raw",
         filename_override: book_pdf_name,
         folder: "book-files",
         format: book_pdf_type,
       });
-
       updatedFields.file = uploadResultPdf.secure_url;
       await fs.promises.unlink(book_pdf_filepath);
     }
